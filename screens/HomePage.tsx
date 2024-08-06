@@ -127,8 +127,15 @@ const Homepage: React.FC<HomepageProps> = ({ session }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.logo} />
-        <Text style={styles.greeting}>Hello, {session.user.email}! Welcome to your Journal!</Text>
+        <Image source={require('../assets/images/logo.png')} style={styles.logo} />
+        <TouchableOpacity
+          style={styles.profileButton}
+          onPress={() => navigation.navigate('Account')}
+        >
+          <Image source={require('../assets/images/profile-icon.png')} style={styles.profileIcon} />
+        </TouchableOpacity>
+        
+        <Text style={styles.greeting}>Hey, {session.user.email} :)</Text>
 
         <Card style={styles.card}>
           <Card.Title title="Your Daily Ratings for the Past Week" titleStyle={styles.cardTitle} />
@@ -151,7 +158,7 @@ const Homepage: React.FC<HomepageProps> = ({ session }) => {
               const todayLocal = getTodayLocal();
               setSelectedDay(todayLocal); // Set selected day to today in local time
               setModalVisible(true);
-            }} style={styles.button}>
+            }} style={styles.button} labelStyle={styles.buttonLabel}>
               Rate Your Day
             </Button>
           </Card.Actions>
@@ -160,7 +167,7 @@ const Homepage: React.FC<HomepageProps> = ({ session }) => {
         <Card style={styles.card}>
           <Card.Title title="Write about your day" titleStyle={styles.cardTitle} />
           <Card.Actions>
-            <Button mode="contained" onPress={() => navigation.navigate('JournalEntry', { session })} style={styles.button}>
+            <Button mode="contained" onPress={() => navigation.navigate('JournalEntry', { session })} style={styles.button} labelStyle={styles.buttonLabel}>
               Fill Your Daily Journal Entry
             </Button>
           </Card.Actions>
@@ -169,7 +176,7 @@ const Homepage: React.FC<HomepageProps> = ({ session }) => {
         <Card style={styles.card}>
           <Card.Title title="View Past Journal Entries" titleStyle={styles.cardTitle} />
           <Card.Actions>
-            <Button mode="contained" onPress={() => navigation.navigate('PastEntries', { session })} style={styles.button}>
+            <Button mode="contained" onPress={() => navigation.navigate('PastEntries', { session })} style={styles.button} labelStyle={styles.buttonLabel}>
               View Past Entries
             </Button>
           </Card.Actions>
@@ -210,10 +217,23 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   logo: {
-    width: 150,
-    height: 150,
-    marginBottom: 20,
+    width: '100%',
+    height: undefined,
+    maxHeight: 400, // or any value you prefer
+    aspectRatio: 1, // Ensure the aspect ratio is maintained
     alignSelf: 'center',
+    resizeMode: 'contain'
+  },
+  profileButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 10,
+  },
+  profileIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   greeting: {
     fontSize: 24,
@@ -224,16 +244,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
   },
   card: {
-    marginVertical: 10,
+    marginVertical: 15,
+    padding: 10,
+    paddingVertical: 20,
     borderRadius: 10,
   },
   cardTitle: {
     fontFamily: 'Poppins-Bold',
+    fontSize: 17,
   },
   ratingsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   ratingItem: {
     alignItems: 'center',
@@ -252,6 +275,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     justifyContent: 'center',
     fontFamily: 'Poppins-Bold',
+  },
+  buttonLabel: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   modalContainer: {
     flex: 1,

@@ -13,6 +13,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { enableScreens } from 'react-native-screens';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { theme, useCustomFonts } from './theme';
+import { StatusBar } from 'react-native'; // Import the StatusBar component
 
 enableScreens();
 
@@ -46,6 +47,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
+      <StatusBar barStyle="dark-content" backgroundColor="#000000" />
       <PaperProvider theme={theme}>
         <NavigationContainer>
           <Stack.Navigator>

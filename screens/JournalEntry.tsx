@@ -63,7 +63,7 @@ const JournalEntry: React.FC<JournalEntryProps> = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.logo} />
+      <Image source={require('../assets/images/account.png')} style={styles.photo} />
       <Card style={styles.card}>
         <Card.Title title="Write about your day" titleStyle={styles.cardTitle} />
         <Card.Content>
@@ -117,6 +117,14 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingVertical: 10,
     justifyContent: 'center',
+  },
+  photo: {
+    width: '100%',
+    height: undefined,
+    maxHeight: 400, // or any value you prefer
+    aspectRatio: 1, // Ensure the aspect ratio is maintained
+    alignSelf: 'center',
+    resizeMode: 'contain'
   },
 });
 

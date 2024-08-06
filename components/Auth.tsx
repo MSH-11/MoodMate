@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
-import { Alert, StyleSheet, View, AppState, Text, SafeAreaView } from 'react-native'
-import { supabase } from '../lib/supabase'
-import { Button, Input } from '@rneui/themed'
+import React, { useState } from 'react';
+import { Alert, StyleSheet, View, AppState } from 'react-native';
+import { supabase } from '../lib/supabase';
+import { Text, Button, TextInput } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -9,91 +10,142 @@ import { Button, Input } from '@rneui/themed'
 // if the user's session is terminated. This should only be registered once.
 AppState.addEventListener('change', (state) => {
   if (state === 'active') {
-    supabase.auth.startAutoRefresh()
+    supabase.auth.startAutoRefresh();
   } else {
-    supabase.auth.stopAutoRefresh()
+    supabase.auth.stopAutoRefresh();
   }
-})
+});
 
 export default function Auth() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function signInWithEmail() {
-    setLoading(true)
+    setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
-    })
+    });
 
-    if (error) Alert.alert(error.message)
-    setLoading(false)
+    if (error) Alert.alert(error.message);
+    setLoading(false);
   }
 
   async function signUpWithEmail() {
-    setLoading(true)
+    setLoading(true);
     const {
       data: { session },
       error,
     } = await supabase.auth.signUp({
       email: email,
       password: password,
-    })
+    });
 
-    if (error) Alert.alert(error.message)
-    if (!session) Alert.alert('Please check your inbox for email verification!')
-    setLoading(false)
+    if (error) Alert.alert(error.message);
+    if (!session) Alert.alert('Please check your inbox for email verification!');
+    setLoading(false);
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View>
-        <Text>Welcome to APP! Please Sign in or Sign Up below :)</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>Welcome to MoodMate!</Text>
+        <Text style={styles.subHeader}>Please Sign in or Sign Up below :)</Text>
       </View>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input
+      <View style={styles.verticallySpaced}>
+        <TextInput
           label="Email"
-          leftIcon={{ type: 'font-awesome', name: 'envelope' }}
+          left={<TextInput.Icon icon="email" />}
           onChangeText={(text) => setEmail(text)}
           value={email}
           placeholder="email@address.com"
-          autoCapitalize={'none'}
+          autoCapitalize="none"
+          mode="outlined"
+          style={styles.input}
         />
       </View>
       <View style={styles.verticallySpaced}>
-        <Input
+        <TextInput
           label="Password"
-          leftIcon={{ type: 'font-awesome', name: 'lock' }}
+          left={<TextInput.Icon icon="lock" />}
           onChangeText={(text) => setPassword(text)}
           value={password}
-          secureTextEntry={true}
+          secureTextEntry
           placeholder="Password"
-          autoCapitalize={'none'}
+          autoCapitalize="none"
+          mode="outlined"
+          style={styles.input}
         />
       </View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
+        <Button
+          mode="contained"
+          onPress={() => signInWithEmail()}
+          loading={loading}
+          disabled={loading}
+          style={styles.button}
+          labelStyle={styles.buttonLabel}
+        >
+          Sign in
+        </Button>
       </View>
       <View style={styles.verticallySpaced}>
-        <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
+        <Button
+          mode="contained"
+          onPress={() => signUpWithEmail()}
+          loading={loading}
+          disabled={loading}
+          style={styles.button}
+          labelStyle={styles.buttonLabel}
+        >
+          Sign up
+        </Button>
       </View>
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 40,
-    marginHorizontal: 20,
-    padding: 12,
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+  },
+  headerContainer: {
+    marginBottom: 40,
+  },
+  header: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+    fontFamily: 'Poppins-Bold',
+  },
+  subHeader: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: '#666',
+    fontFamily: 'Poppins-Regular',
   },
   verticallySpaced: {
-    paddingTop: 4,
-    paddingBottom: 4,
-    alignSelf: 'stretch',
+    marginBottom: 20,
   },
   mt20: {
     marginTop: 20,
   },
-})
+  input: {
+    backgroundColor: '#fff',
+  },
+  button: {
+    width: '100%',
+    paddingVertical: 8,
+    justifyContent: 'center',
+    fontFamily: 'Poppins-Bold',
+  },
+  buttonLabel: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});

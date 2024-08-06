@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { StyleSheet, View, Alert, SafeAreaView } from 'react-native'
-import { Button, Input } from '@rneui/themed'
+import { StyleSheet, View, Alert, Image } from 'react-native'
+import { Button, TextInput, Paragraph } from 'react-native-paper'
 import { Session } from '@supabase/supabase-js'
+import { theme } from '../theme' // Import theme for consistent styling
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Account({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true)
@@ -79,26 +81,50 @@ export default function Account({ session }: { session: Session }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input label="Email" value={session?.user?.email} disabled />
+      <Image source={require('../assets/images/account.png')} style={styles.photo} />
+      <View style={styles.inputContainer}>
+        <TextInput
+          label="Email"
+          value={session?.user?.email}
+          disabled
+          mode="outlined"
+        />
       </View>
-      <View style={styles.verticallySpaced}>
-        <Input label="Username" value={username || ''} onChangeText={(text) => setUsername(text)} />
+      <View style={styles.inputContainer}>
+        <TextInput
+          label="Username"
+          value={username || ''}
+          onChangeText={(text) => setUsername(text)}
+          mode="outlined"
+        />
       </View>
-      <View style={styles.verticallySpaced}>
-        <Input label="Website" value={website || ''} onChangeText={(text) => setWebsite(text)} />
-      </View>
-
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button
-          title={loading ? 'Loading ...' : 'Update'}
-          onPress={() => updateProfile({ username, website, avatar_url: avatarUrl })}
-          disabled={loading}
+      <View style={styles.inputContainer}>
+        <TextInput
+          label="Website"
+          value={website || ''}
+          onChangeText={(text) => setWebsite(text)}
+          mode="outlined"
         />
       </View>
 
-      <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+      <View style={styles.buttonContainer}>
+        <Button
+          mode="contained"
+          onPress={() => updateProfile({ username, website, avatar_url: avatarUrl })}
+          loading={loading}
+          disabled={loading}
+        >
+          {loading ? 'Loading ...' : 'Update'}
+        </Button>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          mode="outlined"
+          onPress={() => supabase.auth.signOut()}
+        >
+          Sign Out
+        </Button>
       </View>
     </SafeAreaView>
   )
@@ -106,16 +132,22 @@ export default function Account({ session }: { session: Session }) {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 40,
-    marginHorizontal: 20,
-    padding: 12,
+    flex: 1,
+    padding: 16,
+    backgroundColor: theme.colors.background,
   },
-  verticallySpaced: {
-    paddingTop: 4,
-    paddingBottom: 4,
-    alignSelf: 'stretch',
+  inputContainer: {
+    marginBottom: 16,
   },
-  mt20: {
+  buttonContainer: {
     marginTop: 20,
+  },
+  photo: {
+    width: '100%',
+    height: undefined,
+    maxHeight: 400, // or any value you prefer
+    aspectRatio: 1, // Ensure the aspect ratio is maintained
+    alignSelf: 'center',
+    resizeMode: 'contain'
   },
 })
