@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View, AppState, Image} from 'react-native';
+import { Alert, StyleSheet, View, AppState, Image, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { Text, Button, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -48,70 +48,80 @@ export default function Auth() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Image source={require('../assets/images/logo.png')} style={styles.logo} />
-        <Text style={styles.subHeader}>Please Sign in or Sign Up below :)</Text>
-      </View>
-      <View style={styles.verticallySpaced}>
-        <TextInput
-          label="Email"
-          left={<TextInput.Icon icon="email" />}
-          onChangeText={(text) => setEmail(text)}
-          value={email}
-          placeholder="email@address.com"
-          autoCapitalize="none"
-          mode="outlined"
-          style={styles.input}
-        />
-      </View>
-      <View style={styles.verticallySpaced}>
-        <TextInput
-          label="Password"
-          left={<TextInput.Icon icon="lock" />}
-          onChangeText={(text) => setPassword(text)}
-          value={password}
-          secureTextEntry
-          placeholder="Password"
-          autoCapitalize="none"
-          mode="outlined"
-          style={styles.input}
-        />
-      </View>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button
-          mode="contained"
-          onPress={() => signInWithEmail()}
-          loading={loading}
-          disabled={loading}
-          style={styles.button}
-          labelStyle={styles.buttonLabel}
-        >
-          Sign in
-        </Button>
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Button
-          mode="contained"
-          onPress={() => signUpWithEmail()}
-          loading={loading}
-          disabled={loading}
-          style={styles.button}
-          labelStyle={styles.buttonLabel}
-        >
-          Sign up
-        </Button>
-      </View>
-    </SafeAreaView>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.headerContainer}>
+            <Image source={require('../assets/images/logo.png')} style={styles.logo} />
+            <Text style={styles.subHeader}>Please Sign in or Sign Up below :)</Text>
+          </View>
+          <View style={styles.verticallySpaced}>
+            <TextInput
+              label="Email"
+              left={<TextInput.Icon icon="email" />}
+              onChangeText={(text) => setEmail(text)}
+              value={email}
+              placeholder="email@address.com"
+              autoCapitalize="none"
+              mode="outlined"
+              style={styles.input}
+            />
+          </View>
+          <View style={styles.verticallySpaced}>
+            <TextInput
+              label="Password"
+              left={<TextInput.Icon icon="lock" />}
+              onChangeText={(text) => setPassword(text)}
+              value={password}
+              secureTextEntry
+              placeholder="Password"
+              autoCapitalize="none"
+              mode="outlined"
+              style={styles.input}
+            />
+          </View>
+          <View style={[styles.verticallySpaced, styles.mt20]}>
+            <Button
+              mode="contained"
+              onPress={() => signInWithEmail()}
+              loading={loading}
+              disabled={loading}
+              style={styles.button}
+              labelStyle={styles.buttonLabel}
+            >
+              Sign in
+            </Button>
+          </View>
+          <View style={styles.verticallySpaced}>
+            <Button
+              mode="contained"
+              onPress={() => signUpWithEmail()}
+              loading={loading}
+              disabled={loading}
+              style={styles.button}
+              labelStyle={styles.buttonLabel}
+            >
+              Sign up
+            </Button>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#f5f5f5',
   },
   headerContainer: {
     marginBottom: 40,

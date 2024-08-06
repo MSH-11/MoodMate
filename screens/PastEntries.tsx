@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, Image, View } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, Image, View, Animated } from 'react-native';
 import { useNavigation, RouteProp } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -18,6 +18,9 @@ const PastEntries: React.FC<PastEntriesProps> = ({ route }) => {
   const { session } = route.params;
   const [entries, setEntries] = useState<any[]>([]);
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
+  const [imageHeight] = useState(new Animated.Value(250));
+  const [titleFontSize] = useState(new Animated.Value(30));
+  const [marginBottom] = useState(new Animated.Value(20));
 
   useEffect(() => {
     fetchEntries();
@@ -43,7 +46,17 @@ const PastEntries: React.FC<PastEntriesProps> = ({ route }) => {
   };
 
   const handlePress = (id: string) => {
-    setExpandedEntryId(expandedEntryId === id ? null : id);
+    if (expandedEntryId === id) {
+      Animated.timing(imageHeight, { toValue: 250, duration: 300, useNativeDriver: false }).start();
+      Animated.timing(titleFontSize, { toValue: 30, duration: 300, useNativeDriver: false }).start();
+      Animated.timing(marginBottom, { toValue: 20, duration: 300, useNativeDriver: false }).start();
+      setExpandedEntryId(null);
+    } else {
+      Animated.timing(imageHeight, { toValue: 150, duration: 300, useNativeDriver: false }).start();
+      Animated.timing(titleFontSize, { toValue: 20, duration: 300, useNativeDriver: false }).start();
+      Animated.timing(marginBottom, { toValue: 10, duration: 300, useNativeDriver: false }).start();
+      setExpandedEntryId(id);
+    }
   };
 
   const renderItem = ({ item }: { item: any }) => {
@@ -69,8 +82,8 @@ const PastEntries: React.FC<PastEntriesProps> = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image source={require('../assets/images/journal.png')} style={styles.photo} />
-      <Text style={styles.title}>Past Journal Entries</Text>
+      <Animated.Image source={require('../assets/images/journal.png')} style={[styles.photo, { height: imageHeight }]} />
+      <Animated.Text style={[styles.title, { fontSize: titleFontSize, marginBottom: marginBottom }]}>Past Journal Entries</Animated.Text>
       <FlatList
         style={styles.scrollable}
         data={entries}
@@ -93,9 +106,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   title: {
-    fontSize: 30,
     fontWeight: 'bold',
-    marginBottom: 20,
     textAlign: 'center',
     fontFamily: 'Poppins-Bold',
   },
@@ -104,8 +115,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     elevation: 2,
     paddingLeft: 15,
-    paddingTop:15,
-    paddingBottom:5,
+    paddingTop: 15,
+    paddingBottom: 5,
     position: 'relative',
   },
   cardContent: {
@@ -129,11 +140,9 @@ const styles = StyleSheet.create({
   },
   photo: {
     width: '100%',
-    height: undefined,
-    maxHeight: 250,
     aspectRatio: 1,
     alignSelf: 'center',
-    resizeMode: 'contain'
+    resizeMode: 'contain',
   },
 });
 
