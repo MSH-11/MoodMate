@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Modal, TouchableOpacity, Image, ScrollView } from 'react-native';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { Text, Button, Card } from 'react-native-paper';
@@ -15,10 +15,34 @@ const Homepage: React.FC<HomepageProps> = ({ session }) => {
   const [weeklyRatings, setWeeklyRatings] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [ratePressed, setRatePressed] = useState(false);
+  const [journalPressed, setJournalPressed] = useState(false);
+  const [fullName, setFullName] = useState('');
 
-  useEffect(() => {
-    fetchWeeklyRatings();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchProfile();
+      fetchWeeklyRatings();
+    }, [])
+  );
+
+  const fetchProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+      } else {
+        setFullName(data.full_name);
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
   const fetchWeeklyRatings = async () => {
     const today = new Date();
@@ -135,7 +159,7 @@ const Homepage: React.FC<HomepageProps> = ({ session }) => {
           <Image source={require('../assets/images/profile-icon.png')} style={styles.profileIcon} />
         </TouchableOpacity>
         
-        <Text style={styles.greeting}>Hey, {session.user.email} :)</Text>
+        <Text style={styles.greeting}>Hey, {fullName || session.user.email} :)</Text>
 
         <Card style={styles.card}>
           <Card.Title title="Your Daily Ratings for the Past Week" titleStyle={styles.cardTitle} />
@@ -151,36 +175,70 @@ const Homepage: React.FC<HomepageProps> = ({ session }) => {
           </Card.Content>
         </Card>
 
-        <Card style={styles.card}>
-          <Card.Title title="How was your day?" titleStyle={styles.cardTitle} />
-          <Card.Actions>
-            <Button mode="contained" onPress={() => {
+        <View style={styles.horizontalCardContainer}>
+          <TouchableOpacity
+            style={[
+              styles.card,
+              styles.cardSideBySide,
+              styles.transparentCard,
+              ratePressed && styles.filledCard,
+            ]}
+            onPressIn={() => setRatePressed(true)}
+            onPressOut={() => setRatePressed(false)}
+            onPress={() => {
               const todayLocal = getTodayLocal();
-              setSelectedDay(todayLocal); // Set selected day to today in local time
+              setSelectedDay(todayLocal);
               setModalVisible(true);
-            }} style={styles.button} labelStyle={styles.buttonLabel}>
-              Rate Your Day
-            </Button>
-          </Card.Actions>
-        </Card>
+            }}
+          >
+            <Card.Content>
+              <Text
+                style={[
+                  styles.actionCardTitle,
+                  ratePressed ? styles.pressedText : styles.unpressedText,
+                ]}
+              >
+                Rate Your Day
+              </Text>
+            </Card.Content>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.card,
+              styles.cardSideBySide,
+              styles.transparentCard,
+              journalPressed && styles.filledCard,
+            ]}
+            onPressIn={() => setJournalPressed(true)}
+            onPressOut={() => setJournalPressed(false)}
+            onPress={() => navigation.navigate('JournalEntry', { session })}
+          >
+            <Card.Content>
+              <Text
+                style={[
+                  styles.actionCardTitle,
+                  journalPressed ? styles.pressedText : styles.unpressedText,
+                ]}
+              >
+                Journal Now
+              </Text>
+            </Card.Content>
+          </TouchableOpacity>
+        </View>
+
+        <Image source={require('../assets/images/account.png')} style={styles.separator} />
 
         <Card style={styles.card}>
-          <Card.Title title="Write about your day" titleStyle={styles.cardTitle} />
-          <Card.Actions>
-            <Button mode="contained" onPress={() => navigation.navigate('JournalEntry', { session })} style={styles.button} labelStyle={styles.buttonLabel}>
-              Fill Your Daily Journal Entry
-            </Button>
-          </Card.Actions>
-        </Card>
-
-        <Card style={styles.card}>
-          <Card.Title title="View Past Journal Entries" titleStyle={styles.cardTitle} />
+          <Card.Title title="I wonder how far we've come ;)" titleStyle={styles.actionCardTitle2} />
           <Card.Actions>
             <Button mode="contained" onPress={() => navigation.navigate('PastEntries', { session })} style={styles.button} labelStyle={styles.buttonLabel}>
               View Past Entries
             </Button>
           </Card.Actions>
         </Card>
+        
+        <Image source={require('../assets/images/account.png')} style={styles.End} />
       </ScrollView>
 
       <Modal
@@ -191,7 +249,7 @@ const Homepage: React.FC<HomepageProps> = ({ session }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Rate your {selectedDay ? getDayName(selectedDay.toISOString()) : ''}</Text>
+            <Text style={styles.modalTitle}>How was your {selectedDay ? getDayName(selectedDay.toISOString()) : ''}?</Text>
             <View style={styles.emojisContainer}>
               {['😡', '😢', '😐', '😊', '😍'].map((emoji, index) => (
                 <TouchableOpacity key={index} onPress={() => handleRateDay(index + 1)}>
@@ -251,9 +309,40 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderRadius: 10,
   },
+  cardSideBySide: {
+    flex: 1,
+    marginHorizontal: 5,
+    paddingVertical: 30,
+  },
+  horizontalCardContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   cardTitle: {
     fontFamily: 'Poppins-Bold',
     fontSize: 17,
+  },
+  actionCardTitle: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 20,
+    textAlign: 'center',
+  },
+  actionCardTitle2: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 20,
+    textAlign: 'center',
+  },
+  separator: {
+    width: '100%',
+    height: 15,
+    resizeMode: 'contain',
+    marginVertical: 15,
+  },
+  End: {
+    width: '100%',
+    height: 300,
+    resizeMode: 'contain',
+    marginVertical: 15,
   },
   ratingsContainer: {
     flexDirection: 'row',
@@ -271,6 +360,22 @@ const styles = StyleSheet.create({
   },
   rating: {
     fontSize: 35,
+  },
+  transparentCard: {
+    borderWidth: 2,
+    borderColor: '#6936b3',
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filledCard: {
+    backgroundColor: '#6936b3',
+  },
+  unpressedText: {
+    color: '#6936b3',
+  },
+  pressedText: {
+    color: '#fff',
   },
   button: {
     width: '100%',
@@ -294,6 +399,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     borderRadius: 15,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#6936b3',
   },
   modalTitle: {
     fontSize: 22,

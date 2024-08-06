@@ -8,8 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Account({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState('');
-  const [website, setWebsite] = useState('');
+  const [fullName, setFullName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
 
   useEffect(() => {
@@ -23,7 +22,7 @@ export default function Account({ session }: { session: Session }) {
 
       const { data, error, status } = await supabase
         .from('profiles')
-        .select(`username, website, avatar_url`)
+        .select(`full_name, avatar_url`)
         .eq('id', session?.user.id)
         .single();
       if (error && status !== 406) {
@@ -31,8 +30,7 @@ export default function Account({ session }: { session: Session }) {
       }
 
       if (data) {
-        setUsername(data.username);
-        setWebsite(data.website);
+        setFullName(data.full_name);
         setAvatarUrl(data.avatar_url);
       }
     } catch (error) {
@@ -45,12 +43,10 @@ export default function Account({ session }: { session: Session }) {
   }
 
   async function updateProfile({
-    username,
-    website,
+    full_name,
     avatar_url,
   }: {
-    username: string;
-    website: string;
+    full_name: string;
     avatar_url: string;
   }) {
     try {
@@ -59,8 +55,7 @@ export default function Account({ session }: { session: Session }) {
 
       const updates = {
         id: session?.user.id,
-        username,
-        website,
+        full_name,
         avatar_url,
         updated_at: new Date(),
       };
@@ -97,17 +92,9 @@ export default function Account({ session }: { session: Session }) {
           </View>
           <View style={styles.inputContainer}>
             <TextInput
-              label="Username"
-              value={username || ''}
-              onChangeText={(text) => setUsername(text)}
-              mode="outlined"
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <TextInput
-              label="Website"
-              value={website || ''}
-              onChangeText={(text) => setWebsite(text)}
+              label="Full Name"
+              value={fullName || ''}
+              onChangeText={(text) => setFullName(text)}
               mode="outlined"
             />
           </View>
@@ -115,7 +102,7 @@ export default function Account({ session }: { session: Session }) {
           <View style={styles.buttonContainer}>
             <Button
               mode="contained"
-              onPress={() => updateProfile({ username, website, avatar_url: avatarUrl })}
+              onPress={() => updateProfile({ full_name: fullName, avatar_url: avatarUrl })}
               loading={loading}
               disabled={loading}
               style={styles.button}
