@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View, AppState } from 'react-native';
+import { Alert, StyleSheet, View, AppState, Image} from 'react-native';
 import { supabase } from '../lib/supabase';
 import { Text, Button, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -50,7 +50,7 @@ export default function Auth() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.header}>Welcome to MoodMate!</Text>
+        <Image source={require('../assets/images/logo.png')} style={styles.logo} />
         <Text style={styles.subHeader}>Please Sign in or Sign Up below :)</Text>
       </View>
       <View style={styles.verticallySpaced}>
@@ -147,5 +147,13 @@ const styles = StyleSheet.create({
   buttonLabel: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  logo: {
+    width: '100%',
+    height: undefined,
+    maxHeight: 350, // or any value you prefer
+    aspectRatio: 1, // Ensure the aspect ratio is maintained
+    alignSelf: 'center',
+    resizeMode: 'contain'
   },
 });

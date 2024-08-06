@@ -199,7 +199,9 @@ const Homepage: React.FC<HomepageProps> = ({ session }) => {
                 </TouchableOpacity>
               ))}
             </View>
-            <Button onPress={() => setModalVisible(false)}>Close</Button>
+            <Button mode="contained" onPress={() => setModalVisible(false)} style={styles.button} labelStyle={styles.buttonLabel}>
+              Close
+            </Button>
           </View>
         </View>
       </Modal>
@@ -284,29 +286,29 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   modalContent: {
-    width: 300,
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
+    width: '85%',
+    padding: 30,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 15,
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 30,
     fontFamily: 'Poppins-Bold',
   },
   emojisContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   emoji: {
-    fontSize: 40,
+    fontSize: 50,
   },
 });
 
