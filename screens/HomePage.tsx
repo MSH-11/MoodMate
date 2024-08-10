@@ -46,54 +46,59 @@ const Homepage: React.FC<HomepageProps> = ({ session }) => {
 
   const fetchWeeklyRatings = async () => {
     const today = new Date();
-    const timezoneOffset = today.getTimezoneOffset() * 60000; // offset in milliseconds
-
+  
+    // Create an array for the past 7 days in local time
     const pastWeek = Array.from({ length: 7 }).map((_, i) => {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
-      if (i === 0) {
-        // Last day (today) with 11:59 PM
-        date.setHours(23, 59, 59, 999);
-      } else if (i === 6) {
-        // First day (6 days ago) with 12:00 AM
-        date.setHours(0, 0, 0, 0);
-      } else {
-        // Other days with start of day
-        date.setHours(0, 0, 0, 0);
-      }
-      // Adjust to local time by removing the timezone offset
-      const localDate = new Date(date.getTime() - timezoneOffset);
+      date.setHours(0, 0, 0, 0); // Set to the start of the day in local time
       return {
-        entry_date: localDate.toISOString(),
+        entry_date: date,
         rating: null,
       };
-    }).reverse();
-
+    }).reverse(); // Reverse to have the dates in ascending order
+  
+    // Create start and end dates for the 9-day window (one day before and one day after the past week)
+    const startDate = new Date(pastWeek[0].entry_date);
+    startDate.setDate(startDate.getDate() - 1); // One day before the start of the week
+  
+    const endDate = new Date(pastWeek[pastWeek.length - 1].entry_date);
+    endDate.setDate(endDate.getDate() + 1); // One day after the end of the week
+  
+    // Fetch entries from Supabase
     const { data, error } = await supabase
       .from('journal_entries')
       .select('entry_date, rating')
       .eq('user_id', session.user.id)
-      .gte('entry_date', pastWeek[0].entry_date)
-      .lte('entry_date', pastWeek[pastWeek.length - 1].entry_date)
+      .gte('entry_date', startDate.toISOString())  // start of the 9-day window
+      .lte('entry_date', endDate.toISOString())  // end of the 9-day window
       .order('entry_date', { ascending: true });
-
+  
     if (error) {
       console.error('Error fetching weekly ratings:', error);
-    } else {
-      const ratingsMap: { [key: string]: number } = data.reduce((acc: { [key: string]: number }, entry: { entry_date: string; rating: number }) => {
-        const localDate = new Date(entry.entry_date).toISOString().split('T')[0];
-        acc[localDate] = entry.rating;
-        return acc;
-      }, {});
-
-      const filledWeek = pastWeek.map(day => ({
-        ...day,
-        rating: ratingsMap[new Date(day.entry_date).toISOString().split('T')[0]] || null,
-      }));
-
-      setWeeklyRatings(filledWeek);
+      return;
     }
+  
+    // Convert fetched entries' dates to local time and map them to the corresponding days
+    const ratingsMap: { [key: string]: number } = data.reduce((acc: { [key: string]: number }, entry: { entry_date: string; rating: number }) => {
+      const localDate = new Date(entry.entry_date);
+      const localDateString = localDate.toLocaleDateString('en-CA'); // Format: YYYY-MM-DD
+      acc[localDateString] = entry.rating;
+      return acc;
+    }, {});
+  
+    // Fill the past week with ratings from the fetched data
+    const filledWeek = pastWeek.map(day => {
+      const dayString = day.entry_date.toLocaleDateString('en-CA'); // Format: YYYY-MM-DD
+      return {
+        ...day,
+        rating: ratingsMap[dayString] || null,
+      };
+    });
+  
+    setWeeklyRatings(filledWeek);
   };
+  
 
   const getDayAbbreviation = (dateString: string) => {
     const date = new Date(dateString);
@@ -108,7 +113,7 @@ const Homepage: React.FC<HomepageProps> = ({ session }) => {
   const handleRateDay = async (rating: number) => {
     if (!selectedDay) return;
 
-    const selectedDate = selectedDay.toISOString().split('T')[0];
+    const selectedDate = new Date().toISOString().split('T')[0];
 
     // Check if there is already an entry for the selected date
     const { data: existingEntry, error: fetchError } = await supabase
