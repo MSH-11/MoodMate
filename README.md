@@ -1,5 +1,7 @@
 # MoodMate
 
+![MoodMate Demo](./MoodMate.gif)
+
 MoodMate is a daily journaling app designed to help users reflect on their day and receive personalized feedback and recommendations based on their journal entries. The app allows users to rate their mood, write journal entries, and access past entries, making it a valuable tool for self-reflection and mental well-being.
 
 ## Features
